@@ -20,7 +20,7 @@ Run face_detection.py to detect sea turtle faces in images.
 ## Contributors
 - Cristian Timothy (@johndoe)
 - Smart Ronald (@janesmith)
-- Lubowa Lamech (@johndoe)
+- Lubowa Lamech (@llubowa)
 - Drucilla Nakanwagi (@johndoe)
 - Calvin Kirabo (@johndoe)
 - Fred Okorio (@johndoe)
