@@ -10,9 +10,9 @@ import pandas as pd
 import logging
 import re
 
-# Adjust pathlib for compatibility
-temp = pathlib.PosixPath
-pathlib.PosixPath = pathlib.WindowsPath
+# # Adjust pathlib for compatibility
+# temp = pathlib.PosixPath
+# pathlib.PosixPath = pathlib.WindowsPath
 
 # Define custom hash functions
 def hash_tensor(x):
