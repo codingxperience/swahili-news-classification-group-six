@@ -10,9 +10,10 @@ import pandas as pd
 import logging
 import re
 
-# # Adjust pathlib for compatibility
+# import pathlib
 # temp = pathlib.PosixPath
 # pathlib.PosixPath = pathlib.WindowsPath
+
 
 # Define custom hash functions
 def hash_tensor(x):
@@ -27,7 +28,7 @@ def hash_learner(learner):
 def load_learner_cached(model_path):
     return load_learner(model_path)
 
-model_path = 'models/swahili_news_classifier.pkl'
+model_path = 'models/sw-news-classifier.pkl'
 st.write("Warming up the model...")
 learner = load_learner_cached(model_path)
 st.write("Model is ready!")
@@ -67,8 +68,6 @@ if submit:
             # Preprocess the news content
             cleaned_news = clean_text(news)
 
-            # st.write("News content input for classification:", cleaned_news)  # Debugging: Check input content
-
             dl = learner.dls.test_dl([cleaned_news])
             predictions, *_ = learner.get_preds(dl=dl)
 
@@ -77,46 +76,35 @@ if submit:
             predicted_category = learner.dls.vocab[predicted_category_index]
             predicted_probabilities = predictions[0].tolist()
 
-            # Debugging: Print out raw probabilities and corresponding categories
-            # st.write("Predicted probabilities and corresponding categories:")
-            # for category, prob in zip(learner.dls.vocab, predicted_probabilities):
-            #     st.write(f"Category: {category}, Probability: {prob}")
+            # Define the correct columns (categories)
+            columns = ['Biashara', 'Burudani', 'Kimataifa', 'Kitaifa', 'Michezo']
 
             # Ensure the lengths of classes and predicted_probabilities match
-            columns = ['Biashara', 'Burudani', 'Kimataifa', 'Kitaifa', 'michezo','afya-health']
             if len(predicted_probabilities) > len(columns):
                 predicted_probabilities = predicted_probabilities[:len(columns)]
             elif len(predicted_probabilities) < len(columns):
                 columns = columns[:len(predicted_probabilities)]
 
-            # Create a DataFrame to drop the extra category
+            # Create a DataFrame to align probabilities with categories
             df = pd.DataFrame([predicted_probabilities], columns=columns)
-            if 'afya-health' in df.columns:
-                df = df.drop(['afya-health'], axis=1)
-
-            # Convert back to list after dropping the extra category
-            predicted_probabilities = df.iloc[0].tolist()
 
             # Display the results
             st.write("Predicted Category:", predicted_category)
-            # st.write("Probabilities for each class:")
-            # st.write(predicted_probabilities)  # Debugging: Check raw probabilities
 
             # Plotting the probabilities
             num_classes = len(df.columns)
             fig, ax = plt.subplots(figsize=(15, 5))
             y_pos = range(num_classes)
             bar_height = 0.35  # Adjust the height of the bars
-            bars = ax.barh(y_pos, predicted_probabilities, align='center', color='#64ffda')
+            bars = ax.barh(y_pos, df.iloc[0], align='center', color='#64ffda')
             ax.set_yticks(y_pos)
-            ax.set_yticklabels([])  # Set y-axis labels to class names
+            ax.set_yticklabels(df.columns)  # Set y-axis labels to class names
             ax.invert_yaxis()  # Invert y-axis to display classes from top to bottom
             ax.set_xlabel('Probability', fontsize=14)
             ax.tick_params(axis='x', labelsize=12)  # Increase font size of x-axis tick labels
 
-
             # Add class labels and probability values to the bars
-            for bar, prob, label in zip(bars, predicted_probabilities, df.columns):
+            for bar, prob, label in zip(bars, df.iloc[0], df.columns):
                 ax.text(bar.get_width() + 0.01, bar.get_y() + bar.get_height() / 2,
                         f'{label}: {prob:.3f}',
                         ha='left', va='center',
